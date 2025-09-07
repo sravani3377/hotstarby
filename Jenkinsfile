@@ -25,7 +25,8 @@ pipeline {
 
         stage('Build WAR') {
             steps {
-                sh 'mvn clean package'
+               sh 'mvn package -Dmaven.clean.failOnError=false'
+
             }
         }
 
