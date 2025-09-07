@@ -2,39 +2,31 @@ pipeline {
     agent any
 
     stages {
-        stage('Pre-clean Workspace') {
-            steps {
-                sh '''
-                    echo "🔧 Fixing permissions..."
-                    sudo chown -R jenkins:jenkins /var/lib/jenkins/workspace/hotstar1 || true
-                    sudo chmod -R 755 /var/lib/jenkins/workspace/hotstar1 || true
-                    echo "🧹 Cleaning old target directory..."
-                    rm -rf /var/lib/jenkins/workspace/hotstar1/target || true
-                '''
-            }
-        }
-
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/sravani3377/hotstarby.git'
                 sh 'pwd'
                 sh 'ls -l'
-                sh 'ls -R'
             }
         }
 
         stage('Build WAR') {
             steps {
-               sh 'mvn package -Dmaven.clean.failOnError=false'
-
+                sh '''
+                    echo "🧹 Cleaning old target folder..."
+                    rm -rf target
+                    echo "⚙️ Building WAR with Maven..."
+                    mvn clean package
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 sh '''
+                    echo "🐳 Building Docker image..."
                     docker rmi -f hotstar:v1 || true
-                    docker build -t hotstar:v1 -f /var/lib/jenkins/workspace/hotstar1/Dockerfile /var/lib/jenkins/workspace/hotstar1
+                    docker build -t hotstar:v1 .
                 '''
             }
         }
@@ -55,6 +47,7 @@ pipeline {
         stage('Deploy Container') {
             steps {
                 sh '''
+                    echo "🚀 Deploying container..."
                     docker rm -f con8 || true
                     docker run -d --name con8 -p 9943:8080 hotstar:v1
                 '''
