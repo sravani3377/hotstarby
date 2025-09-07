@@ -2,12 +2,21 @@ pipeline {
     agent any
 
     stages {
+        stage('Pre-clean Workspace') {
+            steps {
+                sh '''
+                    echo "🔧 Fixing permissions..."
+                    sudo chown -R jenkins:jenkins /var/lib/jenkins/workspace/hotstar1 || true
+                    sudo chmod -R 755 /var/lib/jenkins/workspace/hotstar1 || true
+                    echo "🧹 Cleaning old target directory..."
+                    rm -rf /var/lib/jenkins/workspace/hotstar1/target || true
+                '''
+            }
+        }
+
         stage('Checkout') {
             steps {
-                // Checkout code from main branch
                 git branch: 'main', url: 'https://github.com/sravani3377/hotstarby.git'
-
-                // Verify files
                 sh 'pwd'
                 sh 'ls -l'
                 sh 'ls -R'
