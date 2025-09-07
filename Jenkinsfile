@@ -25,18 +25,19 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker tag hotstar:v1 $DOCKER_USER/hotstar:v1:latest
-                        docker push $DOCKER_USER/hotstar:v1:latest
-                        docker logout
-                    '''
-                }
-            }
+   stage('Push to Docker Hub') {
+    steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+            sh '''
+                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                docker tag hotstar:v1 $DOCKER_USER/hotstar:latest
+                docker push $DOCKER_USER/hotstar:latest
+                docker logout
+            '''
         }
+    }
+}
+
 
         stage('Deploy Container') {
             steps {
