@@ -19,10 +19,8 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
- 
 
-
-              stage('Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 sh '''
                     docker rmi -f hotstar:v1 || true
@@ -36,22 +34,21 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker tag mytomcat $DOCKER_USER/mytomcat:latest
-                        docker push $DOCKER_USER/mytomcat:latest
+                        docker tag hotstar:v1 $DOCKER_USER/hotstar:latest
+                        docker push $DOCKER_USER/hotstar:latest
                         docker logout
                     '''
                 }
             }
         }
+
         stage('Deploy Container') {
             steps {
                 sh '''
                     docker rm -f con8 || true
                     docker run -d --name con8 -p 9943:8080 hotstar:v1
                 '''
-                }
-            }
-        }        
+            }
+        }
     }
-    
-
+}
